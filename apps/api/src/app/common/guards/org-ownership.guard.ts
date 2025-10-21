@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 
 @Injectable()
 export class OrgOwnershipGuard implements CanActivate {
@@ -10,7 +15,8 @@ export class OrgOwnershipGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
 
-    const organizationId = request.params.organizationId || request.body.organizationId;
+    const organizationId =
+      request.params?.organizationId || request.body?.organizationId;
 
     if (organizationId && user.organizationId !== organizationId) {
       throw new ForbiddenException(

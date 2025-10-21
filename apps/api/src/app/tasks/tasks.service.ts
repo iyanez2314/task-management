@@ -46,7 +46,7 @@ export class TasksService {
 
   findByOrganization(organizationId: string): Promise<Task[]> {
     return this.tasksRepository.find({
-      where: { organization: { id: organizationId } },
+      where: { organizationId: organizationId },
       relations: ['organization', 'assignee'],
     });
   }

@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { AuthGuard } from './guards/auth.guard';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { AuditInterceptor } from './interceptors/audit.interceptor';
 import { UsersModule } from '../users/users.module';
@@ -10,7 +10,7 @@ import { UsersModule } from '../users/users.module';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: AuthGuard,
+      useClass: JwtAuthGuard,
     },
     {
       provide: APP_GUARD,
