@@ -7,6 +7,7 @@ import { OrganizationsModule } from './organizations/organizations.module';
 import { TasksModule } from './tasks/tasks.module';
 import { RolesModule } from './roles/role.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { CommonModule } from './common/common.module';
 
 @Module({
   imports: [
@@ -20,7 +21,11 @@ import { PermissionsModule } from './permissions/permissions.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV !== 'production',
+      ssl: process.env.DB_HOST?.includes('supabase.co')
+        ? { rejectUnauthorized: false }
+        : false,
     }),
+    CommonModule,
     UsersModule,
     OrganizationsModule,
     TasksModule,
