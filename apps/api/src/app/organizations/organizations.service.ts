@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Organization } from './organization.entity';
-import { User } from '../users/user.entity';
+import { Organization, User } from '@turbovets/data';
 
 @Injectable()
 export class OrganizationsService {

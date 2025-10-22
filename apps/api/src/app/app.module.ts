@@ -9,11 +9,7 @@ import { RolesModule } from './roles/role.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
-import { User } from './users/user.entity';
-import { Organization } from './organizations/organization.entity';
-import { Task } from './tasks/task.entity';
-import { Role } from './roles/role.entity';
-import { Permission } from './permissions/permission.entity';
+import { User, Organization, Task, Role, Permission } from '@turbovets/data';
 
 @Module({
   imports: [

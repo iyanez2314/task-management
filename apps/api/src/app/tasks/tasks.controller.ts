@@ -7,18 +7,16 @@ import {
   Body,
   Param,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
 import { TasksService } from './tasks.service';
-import { Task, TaskStatus, TaskPriority } from './task.entity';
-import { AuthGuard } from '../common/guards/auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { OrgOwnershipGuard } from '../common/guards/org-ownership.guard';
-import { AuditInterceptor } from '../common/interceptors/audit.interceptor';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { RoleType } from '../roles/role.entity';
-import { User } from '../users/user.entity';
+import {
+  Task,
+  User,
+  RoleType,
+  CreateTaskDto,
+  UpdateTaskDto,
+} from '@turbovets/data';
+import { OrgOwnershipGuard, Roles, CurrentUser } from '@turbovets/auth';
 
 @Controller('tasks')
 @UseGuards(OrgOwnershipGuard)
@@ -53,26 +51,15 @@ export class TasksController {
 
   @Post()
   @Roles(RoleType.ADMIN)
-  create(
-    @Body()
-    body: {
-      title: string;
-      description?: string;
-      organizationId: string;
-      assigneeId?: string;
-      status?: TaskStatus;
-      priority?: TaskPriority;
-      dueDate?: Date;
-    }
-  ): Promise<Task> {
+  create(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
     return this.tasksService.create(
-      body.title,
-      body.description,
-      body.organizationId,
-      body.assigneeId,
-      body.status,
-      body.priority,
-      body.dueDate
+      createTaskDto.title,
+      createTaskDto.description,
+      createTaskDto.organizationId,
+      createTaskDto.assigneeId,
+      createTaskDto.status,
+      createTaskDto.priority,
+      createTaskDto.dueDate
     );
   }
 
@@ -80,24 +67,16 @@ export class TasksController {
   @Roles(RoleType.ADMIN)
   update(
     @Param('id') id: string,
-    @Body()
-    body: {
-      title?: string;
-      description?: string;
-      status?: TaskStatus;
-      priority?: TaskPriority;
-      dueDate?: Date;
-      assigneeId?: string;
-    }
+    @Body() updateTaskDto: UpdateTaskDto
   ): Promise<Task> {
     return this.tasksService.update(
       id,
-      body.title,
-      body.description,
-      body.status,
-      body.priority,
-      body.dueDate,
-      body.assigneeId
+      updateTaskDto.title,
+      updateTaskDto.description,
+      updateTaskDto.status,
+      updateTaskDto.priority,
+      updateTaskDto.dueDate,
+      updateTaskDto.assigneeId
     );
   }
 

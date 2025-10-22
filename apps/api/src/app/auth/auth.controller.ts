@@ -1,9 +1,7 @@
 import { Controller, Post, Body, Get, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './jwt-auth.guard';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { Public } from '../common/decorators/public.decorator';
-import { User } from '../users/user.entity';
+import { User, LoginDto, RegisterDto } from '@turbovets/data';
+import { JwtAuthGuard, CurrentUser, Public } from '@turbovets/auth';
 
 @Controller('auth')
 export class AuthController {
@@ -11,31 +9,20 @@ export class AuthController {
 
   @Public()
   @Post('register')
-  async register(
-    @Body()
-    body: {
-      email: string;
-      password: string;
-      name: string;
-      organizationId: string;
-      roleId: string;
-    }
-  ) {
+  async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(
-      body.email,
-      body.password,
-      body.name,
-      body.organizationId,
-      body.roleId
+      registerDto.email,
+      registerDto.password,
+      registerDto.name,
+      registerDto.organizationId,
+      registerDto.roleId
     );
   }
 
   @Public()
   @Post('login')
-  async login(
-    @Body() body: { email: string; password: string }
-  ) {
-    return this.authService.login(body.email, body.password);
+  async login(@Body() loginDto: LoginDto) {
+    return this.authService.login(loginDto.email, loginDto.password);
   }
 
   @Get('me')

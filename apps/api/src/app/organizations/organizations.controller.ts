@@ -6,14 +6,16 @@ import {
   Delete,
   Body,
   Param,
+  UseGuards,
 } from '@nestjs/common';
 import { OrganizationsService } from './organizations.service';
-import { Organization } from './organization.entity';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { OrgOwnershipGuard } from '../common/guards/org-ownership.guard';
-import { UseGuards } from '@nestjs/common';
-import { Roles } from '../common/decorators/roles.decorator';
-import { RoleType } from '../roles/role.entity';
+import {
+  Organization,
+  RoleType,
+  CreateOrganizationDto,
+  UpdateOrganizationDto,
+} from '@turbovets/data';
+import { OrgOwnershipGuard, Roles } from '@turbovets/auth';
 
 @Controller('organizations')
 @UseGuards(OrgOwnershipGuard)
@@ -41,22 +43,25 @@ export class OrganizationsController {
   @Post()
   @Roles(RoleType.OWNER)
   create(
-    @Body() body: { name: string; description?: string }
+    @Body() createOrganizationDto: CreateOrganizationDto
   ): Promise<Organization> {
-    return this.organizationsService.create(body.name, body.description);
+    return this.organizationsService.create(
+      createOrganizationDto.name,
+      createOrganizationDto.description
+    );
   }
 
   @Put(':id')
   @Roles(RoleType.OWNER)
   update(
     @Param('id') id: string,
-    @Body() body: { name?: string; description?: string; isActive?: boolean }
+    @Body() updateOrganizationDto: UpdateOrganizationDto
   ): Promise<Organization> {
     return this.organizationsService.update(
       id,
-      body.name,
-      body.description,
-      body.isActive
+      updateOrganizationDto.name,
+      updateOrganizationDto.description,
+      updateOrganizationDto.isActive
     );
   }
 

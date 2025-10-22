@@ -2,27 +2,15 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
+import type { IUser } from '@turbovets/data/frontend';
 
-export interface User {
-  id: string;
-  email: string;
-  name: string;
-  organizationId: string;
-  roleId: string;
-  role: {
-    name: string;
-    permissions: Array<{ name: string }>;
-  };
-  organization: {
-    name: string;
-  };
-}
+export type User = IUser;
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
+  public currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor(private http: HttpClient, private router: Router) {}

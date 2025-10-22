@@ -4,19 +4,8 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
-
-interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: string;
-  priority: string;
-  assignee?: {
-    id: string;
-    name: string;
-    email: string;
-  };
-}
+import type { ITask, IUser } from '@turbovets/data/frontend';
+import { RoleType } from '@turbovets/data/frontend';
 
 @Component({
   imports: [RouterModule, CommonModule, FormsModule],
@@ -24,8 +13,8 @@ interface Task {
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent implements OnInit {
-  tasks: Task[] = [];
-  users: any[] = [];
+  tasks: ITask[] = [];
+  users: IUser[] = [];
   loading: boolean = true;
   error: string | null = null;
 
@@ -70,8 +59,8 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchTasks() {
-    this.http.get<Task[]>('http://localhost:3000/api/tasks').subscribe({
-      next: (data: any) => {
+    this.http.get<ITask[]>('http://localhost:3000/api/tasks').subscribe({
+      next: (data: ITask[]) => {
         this.tasks = data;
         this.loading = false;
       },
@@ -110,13 +99,12 @@ export class DashboardComponent implements OnInit {
     }
 
     this.http
-      .get<any[]>(
+      .get<IUser[]>(
         `http://localhost:3000/api/organizations/${organizationId}/users`
       )
       .subscribe({
-        next: (users) => {
+        next: (users: IUser[]) => {
           this.users = users;
-          console.log('Users loaded:', users);
         },
         error: (err) => {
           console.error('Error loading users:', err);
@@ -156,21 +144,19 @@ export class DashboardComponent implements OnInit {
       status: this.newTask.status,
       priority: this.newTask.priority,
       assigneeId: this.newTask.assigneeId || null,
-      organizationId: organizationId,
+      organizationId: this.isEditMode ? undefined : organizationId,
     };
 
     const request =
       this.isEditMode && this.taskBeingEdited
-        ? this.http.put<Task>(
+        ? this.http.put<ITask>(
             `http://localhost:3000/api/tasks/${this.taskBeingEdited}`,
             taskData
           )
-        : this.http.post<Task>('http://localhost:3000/api/tasks', taskData);
+        : this.http.post<ITask>('http://localhost:3000/api/tasks', taskData);
 
     request.subscribe({
       next: (newTask) => {
-        console.log('✅ Task created:', newTask);
-
         this.fetchTasks();
 
         this.closeCreateModal();
@@ -184,7 +170,6 @@ export class DashboardComponent implements OnInit {
         };
       },
       error: (err) => {
-        console.error('❌ Error creating task:', err);
         alert(
           'Failed to create task: ' + (err.error?.message || 'Unknown error')
         );
@@ -213,11 +198,11 @@ export class DashboardComponent implements OnInit {
       const organizationId = this.authService.getOrganizationId();
       if (organizationId) {
         this.http
-          .get<any[]>(
+          .get<IUser[]>(
             `http://localhost:3000/api/organizations/${organizationId}/users`
           )
           .subscribe({
-            next: (users) => {
+            next: (users: IUser[]) => {
               this.users = users;
             },
           });
@@ -234,8 +219,6 @@ export class DashboardComponent implements OnInit {
       .delete(`http://localhost:3000/api/tasks/${this.taskToDelete}`)
       .subscribe({
         next: () => {
-          console.log('✅ Task deleted');
-
           this.fetchTasks();
 
           this.closeDeleteModal();
@@ -247,5 +230,51 @@ export class DashboardComponent implements OnInit {
           );
         },
       });
+  }
+
+  canEditTask(task: ITask): boolean {
+    const currentUser = this.authService.currentUserSubject.value;
+
+    if (!currentUser || !currentUser.role) {
+      return false;
+    }
+
+    // Only OWNER and ADMIN can edit tasks
+    if (
+      currentUser.role.name === RoleType.OWNER ||
+      currentUser.role.name === RoleType.ADMIN
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+  canDeleteTask(task: ITask): boolean {
+    const currentUser = this.authService.currentUserSubject.value;
+
+    if (!currentUser || !currentUser.role) {
+      return false;
+    }
+
+    // Only OWNER can delete tasks
+    if (currentUser.role.name === RoleType.OWNER) {
+      return true;
+    }
+
+    return false;
+  }
+
+  canCreateTask(): boolean {
+    const currentUser = this.authService.currentUserSubject.value;
+
+    if (!currentUser || !currentUser.role) {
+      return false;
+    }
+
+    return (
+      currentUser.role.name === RoleType.OWNER ||
+      currentUser.role.name === RoleType.ADMIN
+    );
   }
 }

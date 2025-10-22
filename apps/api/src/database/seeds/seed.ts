@@ -4,11 +4,7 @@ import * as bcrypt from 'bcryptjs';
 import { DataSource } from 'typeorm';
 
 dotenv.config();
-import { Role, RoleType } from '../../app/roles/role.entity';
-import { Permission } from '../../app/permissions/permission.entity';
-import { Organization } from '../../app/organizations/organization.entity';
-import { User } from '../../app/users/user.entity';
-import { Task, TaskStatus, TaskPriority } from '../../app/tasks/task.entity';
+import { Role, RoleType, Permission, Organization, User, Task, TaskStatus, TaskPriority } from '@turbovets/data';
 
 async function seed() {
   const dataSource = new DataSource({

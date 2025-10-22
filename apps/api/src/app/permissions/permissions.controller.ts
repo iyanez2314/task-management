@@ -6,13 +6,16 @@ import {
   Body,
   Put,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
-import { Permission } from './permission.entity';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { UseGuards } from '@nestjs/common';
-import { Roles } from '../common/decorators/roles.decorator';
-import { RoleType } from '../roles/role.entity';
+import {
+  Permission,
+  RoleType,
+  CreatePermissionDto,
+  UpdatePermissionDto,
+} from '@turbovets/data';
+import { RolesGuard, Roles } from '@turbovets/auth';
 
 @Controller('permissions')
 export class PermissionsController {
@@ -33,26 +36,25 @@ export class PermissionsController {
   @Post()
   @Roles(RoleType.OWNER)
   create(
-    @Body()
-    body: {
-      name: string;
-      description?: string;
-    }
+    @Body() createPermissionDto: CreatePermissionDto
   ): Promise<Permission> {
-    return this.permissionsService.create(body.name, body.description);
+    return this.permissionsService.create(
+      createPermissionDto.name,
+      createPermissionDto.description
+    );
   }
 
   @Put(':id')
   @Roles(RoleType.OWNER)
   update(
     @Param('id') id: string,
-    @Body()
-    body: {
-      name?: string;
-      description?: string;
-    }
+    @Body() updatePermissionDto: UpdatePermissionDto
   ): Promise<Permission | null> {
-    return this.permissionsService.update(id, body.name, body.description);
+    return this.permissionsService.update(
+      id,
+      updatePermissionDto.name,
+      updatePermissionDto.description
+    );
   }
 
   @Delete(':id')

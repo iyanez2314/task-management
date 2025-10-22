@@ -6,12 +6,11 @@ import {
   Body,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
-import { Role, RoleType } from './role.entity';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { UseGuards } from '@nestjs/common';
-import { Roles } from '../common/decorators/roles.decorator';
+import { Role, RoleType, CreateRoleDto, UpdateRoleDto } from '@turbovets/data';
+import { RolesGuard, Roles } from '@turbovets/auth';
 
 @Controller('roles')
 export class RolesController {
@@ -32,17 +31,12 @@ export class RolesController {
   @Post()
   @Roles(RoleType.OWNER)
   create(
-    @Body()
-    body: {
-      name: RoleType;
-      description?: string;
-      permissions: string[];
-    }
+    @Body() createRoleDto: CreateRoleDto
   ): Promise<Role> {
     return this.rolesService.create(
-      body.name,
-      body.description,
-      body.permissions
+      createRoleDto.name,
+      createRoleDto.description,
+      createRoleDto.permissions
     );
   }
 

@@ -14,7 +14,11 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@turbovets/data": ["libs/data/src/index.ts"],
+      "@turbovets/data/frontend": ["libs/data/src/frontend.ts"],
+      "@turbovets/auth": ["libs/auth/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

@@ -1,10 +1,16 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Param,
+  Body,
+  UseGuards,
+} from '@nestjs/common';
 import { UsersService } from './users.service';
-import { User } from './user.entity';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { OrgOwnershipGuard } from '../common/guards/org-ownership.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { RoleType } from '../roles/role.entity';
+import { User, RoleType, CreateUserDto, UpdateUserDto } from '@turbovets/data';
+import { OrgOwnershipGuard, Roles } from '@turbovets/auth';
 
 @Controller('users')
 @UseGuards(OrgOwnershipGuard)
@@ -25,25 +31,20 @@ export class UsersController {
 
   @Get('organization/:organizationId')
   @Roles(RoleType.VIEWER)
-  findByOrganization(@Param('organizationId') organizationId: string): Promise<User[]> {
+  findByOrganization(
+    @Param('organizationId') organizationId: string
+  ): Promise<User[]> {
     return this.usersService.findByOrganization(organizationId);
   }
 
   @Post()
   @Roles(RoleType.ADMIN)
-  create(
-    @Body() body: {
-      email: string;
-      name: string;
-      organizationId: string;
-      roleId: string;
-    }
-  ): Promise<User> {
+  create(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.usersService.create(
-      body.email,
-      body.name,
-      body.organizationId,
-      body.roleId
+      createUserDto.email,
+      createUserDto.name,
+      createUserDto.organizationId,
+      createUserDto.roleId
     );
   }
 
@@ -51,19 +52,14 @@ export class UsersController {
   @Roles(RoleType.ADMIN)
   update(
     @Param('id') id: string,
-    @Body() body: {
-      name?: string;
-      email?: string;
-      roleId?: string;
-      isActive?: boolean;
-    }
+    @Body() updateUserDto: UpdateUserDto
   ): Promise<User> {
     return this.usersService.update(
       id,
-      body.name,
-      body.email,
-      body.roleId,
-      body.isActive
+      updateUserDto.name,
+      updateUserDto.email,
+      updateUserDto.roleId,
+      updateUserDto.isActive
     );
   }
 
