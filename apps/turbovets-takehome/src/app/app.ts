@@ -5,7 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 
 @Component({
-  imports: [NxWelcome, RouterModule, CommonModule],
+  imports: [RouterModule, CommonModule],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.css',
@@ -30,7 +30,8 @@ export class App implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Failed to connect to API. Make sure the API is running on port 3000.';
+        this.error =
+          'Failed to connect to API. Make sure the API is running on port 3000.';
         this.loading = false;
         console.error('API Error:', err);
       },
