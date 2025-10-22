@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { NxWelcome } from './nx-welcome';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
+import { environment } from '../environments/environment';
 
 @Component({
   imports: [RouterModule, CommonModule],
@@ -12,6 +13,7 @@ import { CommonModule } from '@angular/common';
 })
 export class App implements OnInit {
   private http = inject(HttpClient);
+  private apiUrl = environment.apiUrl;
   protected title = 'dashboard';
   protected apiMessage = '';
   protected loading = false;
@@ -24,7 +26,7 @@ export class App implements OnInit {
   fetchFromApi() {
     this.loading = true;
     this.error = '';
-    this.http.get<{ message: string }>('http://localhost:3000/api').subscribe({
+    this.http.get<{ message: string }>(`${this.apiUrl}`).subscribe({
       next: (data) => {
         this.apiMessage = data.message;
         this.loading = false;

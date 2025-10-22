@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import type { ITask, IUser } from '@turbovets/data/frontend';
 import { RoleType } from '@turbovets/data/frontend';
+import { environment } from '../../environments/environment';
 
 @Component({
   imports: [RouterModule, CommonModule, FormsModule],
@@ -13,6 +14,7 @@ import { RoleType } from '@turbovets/data/frontend';
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent implements OnInit {
+  private apiUrl = environment.apiUrl;
   tasks: ITask[] = [];
   users: IUser[] = [];
   loading: boolean = true;
@@ -68,7 +70,7 @@ export class DashboardComponent implements OnInit {
   }
 
   fetchTasks() {
-    this.http.get<ITask[]>('http://localhost:3000/api/tasks').subscribe({
+    this.http.get<ITask[]>(`${this.apiUrl}/tasks`).subscribe({
       next: (data: ITask[]) => {
         this.tasks = data;
         this.loading = false;
@@ -109,7 +111,7 @@ export class DashboardComponent implements OnInit {
 
     this.http
       .get<IUser[]>(
-        `http://localhost:3000/api/organizations/${organizationId}/users`
+        `${this.apiUrl}/organizations/${organizationId}/users`
       )
       .subscribe({
         next: (users: IUser[]) => {
@@ -159,10 +161,10 @@ export class DashboardComponent implements OnInit {
     const request =
       this.isEditMode && this.taskBeingEdited
         ? this.http.put<ITask>(
-            `http://localhost:3000/api/tasks/${this.taskBeingEdited}`,
+            `${this.apiUrl}/tasks/${this.taskBeingEdited}`,
             taskData
           )
-        : this.http.post<ITask>('http://localhost:3000/api/tasks', taskData);
+        : this.http.post<ITask>(`${this.apiUrl}/tasks`, taskData);
 
     request.subscribe({
       next: (newTask) => {
@@ -206,7 +208,7 @@ export class DashboardComponent implements OnInit {
       if (organizationId) {
         this.http
           .get<IUser[]>(
-            `http://localhost:3000/api/organizations/${organizationId}/users`
+            `${this.apiUrl}/organizations/${organizationId}/users`
           )
           .subscribe({
             next: (users: IUser[]) => {
@@ -223,7 +225,7 @@ export class DashboardComponent implements OnInit {
     }
 
     this.http
-      .delete(`http://localhost:3000/api/tasks/${this.taskToDelete}`)
+      .delete(`${this.apiUrl}/tasks/${this.taskToDelete}`)
       .subscribe({
         next: () => {
           this.fetchTasks();
@@ -308,7 +310,7 @@ export class DashboardComponent implements OnInit {
     };
 
     // Load available roles
-    this.http.get<any[]>('http://localhost:3000/api/roles').subscribe({
+    this.http.get<any[]>(`${this.apiUrl}/roles`).subscribe({
       next: (roles) => {
         this.roles = roles;
       },
@@ -347,7 +349,7 @@ export class DashboardComponent implements OnInit {
     };
 
     this.http
-      .post<IUser>('http://localhost:3000/api/users', userData)
+      .post<IUser>(`${this.apiUrl}/users`, userData)
       .subscribe({
         next: (newUser) => {
           alert('User created successfully');

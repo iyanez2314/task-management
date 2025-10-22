@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import type { IUser } from '@turbovets/data/frontend';
+import { environment } from '../../environments/environment';
 
 export type User = IUser;
 
@@ -10,6 +11,7 @@ export type User = IUser;
   providedIn: 'root',
 })
 export class AuthService {
+  private apiUrl = environment.apiUrl;
   public currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
@@ -21,7 +23,7 @@ export class AuthService {
   ): Observable<{ access_token: string; user: User }> {
     return this.http
       .post<{ access_token: string; user: User }>(
-        'http://localhost:3000/api/auth/login',
+        `${this.apiUrl}/auth/login`,
         { email, password }
       )
       .pipe(
@@ -40,7 +42,7 @@ export class AuthService {
 
   loadCurrentUser(): Observable<User> {
     return this.http
-      .get<User>('http://localhost:3000/api/auth/me')
+      .get<User>(`${this.apiUrl}/auth/me`)
       .pipe(tap((user) => this.currentUserSubject.next(user)));
   }
 
