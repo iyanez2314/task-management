@@ -33,6 +33,15 @@ export class DashboardComponent implements OnInit {
   isEditMode: boolean = false;
   taskBeingEdited: string | null = null;
 
+  showAddUserModal: boolean = false;
+  roles: any[] = [];
+  newUser = {
+    name: '',
+    email: '',
+    password: '',
+    roleId: '',
+  };
+
   constructor(
     private http: HttpClient,
     private router: Router,
@@ -185,7 +194,6 @@ export class DashboardComponent implements OnInit {
       this.taskBeingEdited = taskId;
       this.showCreateModal = true;
 
-      // Load task data into form
       this.newTask = {
         title: task.title,
         description: task.description,
@@ -194,7 +202,6 @@ export class DashboardComponent implements OnInit {
         assigneeId: task.assignee?.id || '',
       };
 
-      // Load users for the dropdown
       const organizationId = this.authService.getOrganizationId();
       if (organizationId) {
         this.http
@@ -239,7 +246,6 @@ export class DashboardComponent implements OnInit {
       return false;
     }
 
-    // Only OWNER and ADMIN can edit tasks
     if (
       currentUser.role.name === RoleType.OWNER ||
       currentUser.role.name === RoleType.ADMIN
@@ -257,7 +263,6 @@ export class DashboardComponent implements OnInit {
       return false;
     }
 
-    // Only OWNER can delete tasks
     if (currentUser.role.name === RoleType.OWNER) {
       return true;
     }
@@ -276,5 +281,83 @@ export class DashboardComponent implements OnInit {
       currentUser.role.name === RoleType.OWNER ||
       currentUser.role.name === RoleType.ADMIN
     );
+  }
+
+  canManageUsers(): boolean {
+    const currentUser = this.authService.currentUserSubject.value;
+
+    if (!currentUser || !currentUser.role) {
+      return false;
+    }
+
+    return (
+      currentUser.role.name === RoleType.OWNER ||
+      currentUser.role.name === RoleType.ADMIN
+    );
+  }
+
+  openAddUserModal() {
+    this.showAddUserModal = true;
+
+    // Reset form
+    this.newUser = {
+      name: '',
+      email: '',
+      password: '',
+      roleId: '',
+    };
+
+    // Load available roles
+    this.http.get<any[]>('http://localhost:3000/api/roles').subscribe({
+      next: (roles) => {
+        this.roles = roles;
+      },
+      error: (err) => {
+        console.error('Error loading roles:', err);
+      },
+    });
+  }
+
+  closeAddUserModal() {
+    this.showAddUserModal = false;
+  }
+
+  saveUser() {
+    if (
+      !this.newUser.name.trim() ||
+      !this.newUser.email.trim() ||
+      !this.newUser.password.trim() ||
+      !this.newUser.roleId
+    ) {
+      alert('Please fill in all user details');
+      return;
+    }
+    const organizationId = this.authService.getOrganizationId();
+    if (!organizationId) {
+      alert('Organization ID not found. Please log in again.');
+      return;
+    }
+
+    const userData = {
+      name: this.newUser.name,
+      email: this.newUser.email,
+      password: this.newUser.password,
+      roleId: this.newUser.roleId,
+      organizationId: organizationId,
+    };
+
+    this.http
+      .post<IUser>('http://localhost:3000/api/users', userData)
+      .subscribe({
+        next: (newUser) => {
+          alert('User created successfully');
+          this.closeAddUserModal();
+        },
+        error: (err) => {
+          alert(
+            'Failed to create user: ' + (err.error?.message || 'Unknown error')
+          );
+        },
+      });
   }
 }

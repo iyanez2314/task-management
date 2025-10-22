@@ -44,7 +44,8 @@ export class UsersController {
       createUserDto.email,
       createUserDto.name,
       createUserDto.organizationId,
-      createUserDto.roleId
+      createUserDto.roleId,
+      createUserDto.password
     );
   }
 
