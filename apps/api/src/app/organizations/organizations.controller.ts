@@ -32,6 +32,12 @@ export class OrganizationsController {
     return this.organizationsService.findOne(id);
   }
 
+  @Get(':id/users')
+  @Roles(RoleType.VIEWER)
+  findUsers(@Param('id') id: string) {
+    return this.organizationsService.findUsers(id);
+  }
+
   @Post()
   @Roles(RoleType.OWNER)
   create(

@@ -2,12 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Organization } from './organization.entity';
+import { User } from '../users/user.entity';
 
 @Injectable()
 export class OrganizationsService {
   constructor(
     @InjectRepository(Organization)
     private organizationsRepository: Repository<Organization>,
+    @InjectRepository(User)
+    private usersRepository: Repository<User>,
   ) {}
 
   findAll(): Promise<Organization[]> {
@@ -42,5 +45,13 @@ export class OrganizationsService {
 
   async remove(id: string): Promise<void> {
     await this.organizationsRepository.delete(id);
+  }
+
+  async findUsers(organizationId: string): Promise<User[]> {
+    return this.usersRepository.find({
+      where: { organizationId },
+      relations: ['role'],
+      select: ['id', 'name', 'email', 'roleId'],
+    });
   }
 }

@@ -1,8 +1,8 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, FormGroup } from '@angular/forms';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   imports: [RouterModule, CommonModule, ReactiveFormsModule],
@@ -14,7 +14,7 @@ export class LoginComponent {
 
   constructor(
     private fb: FormBuilder,
-    private http: HttpClient,
+    private authService: AuthService,
     private router: Router
   ) {
     this.loginForm = this.fb.group({
@@ -26,25 +26,16 @@ export class LoginComponent {
   login() {
     const { email, password } = this.loginForm.value;
 
-    this.http
-      .post<{ access_token: string; user: any }>(
-        'http://localhost:3000/api/auth/login',
-        { email, password }
-      )
-      .subscribe({
-        next: (response) => {
-          console.log('✅ Login successful', response);
-
-          // Store the token
-          localStorage.setItem('access_token', response.access_token);
-
-          // Redirect to dashboard
-          this.router.navigate(['/dashboard']);
-        },
-        error: (error) => {
-          console.error('❌ Login failed', error);
-          alert('Login failed: ' + (error.error?.message || 'Invalid credentials'));
-        }
-      });
+    this.authService.login(email, password).subscribe({
+      next: (response) => {
+        console.log('✅ Login successful', response);
+        // Redirect to dashboard
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => {
+        console.error('❌ Login failed', error);
+        alert('Login failed: ' + (error.error?.message || 'Invalid credentials'));
+      }
+    });
   }
 }
