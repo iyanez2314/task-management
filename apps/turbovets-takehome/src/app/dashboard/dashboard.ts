@@ -12,6 +12,7 @@ interface Task {
   status: string;
   priority: string;
   assignee?: {
+    id: string;
     name: string;
     email: string;
   };
@@ -36,6 +37,12 @@ export class DashboardComponent implements OnInit {
     assigneeId: '',
     priority: 'medium',
   };
+
+  showDeleteModal: boolean = false;
+  taskToDelete: string | null = null;
+
+  isEditMode: boolean = false;
+  taskBeingEdited: string | null = null;
 
   constructor(
     private http: HttpClient,
@@ -81,6 +88,8 @@ export class DashboardComponent implements OnInit {
   }
 
   openCreateTaskModal() {
+    this.isEditMode = false;
+    this.taskBeingEdited = null;
     this.showCreateModal = true;
 
     // Reset form
@@ -119,7 +128,17 @@ export class DashboardComponent implements OnInit {
     this.showCreateModal = false;
   }
 
-  createTask() {
+  closeDeleteModal() {
+    this.showDeleteModal = false;
+    this.taskToDelete = null;
+  }
+
+  onOpenConfirmDeleteModal(taskId: string) {
+    this.taskToDelete = taskId;
+    this.showDeleteModal = true;
+  }
+
+  saveTask() {
     if (!this.newTask.title.trim()) {
       alert('Please enter a task title');
       return;
@@ -140,28 +159,91 @@ export class DashboardComponent implements OnInit {
       organizationId: organizationId,
     };
 
+    const request =
+      this.isEditMode && this.taskBeingEdited
+        ? this.http.put<Task>(
+            `http://localhost:3000/api/tasks/${this.taskBeingEdited}`,
+            taskData
+          )
+        : this.http.post<Task>('http://localhost:3000/api/tasks', taskData);
+
+    request.subscribe({
+      next: (newTask) => {
+        console.log('✅ Task created:', newTask);
+
+        this.fetchTasks();
+
+        this.closeCreateModal();
+
+        this.newTask = {
+          title: '',
+          description: '',
+          assigneeId: '',
+          status: 'todo',
+          priority: 'medium',
+        };
+      },
+      error: (err) => {
+        console.error('❌ Error creating task:', err);
+        alert(
+          'Failed to create task: ' + (err.error?.message || 'Unknown error')
+        );
+      },
+    });
+  }
+
+  editTask(taskId: string) {
+    const task = this.tasks.find((t) => t.id === taskId);
+
+    if (task) {
+      this.isEditMode = true;
+      this.taskBeingEdited = taskId;
+      this.showCreateModal = true;
+
+      // Load task data into form
+      this.newTask = {
+        title: task.title,
+        description: task.description,
+        status: task.status,
+        priority: task.priority,
+        assigneeId: task.assignee?.id || '',
+      };
+
+      // Load users for the dropdown
+      const organizationId = this.authService.getOrganizationId();
+      if (organizationId) {
+        this.http
+          .get<any[]>(
+            `http://localhost:3000/api/organizations/${organizationId}/users`
+          )
+          .subscribe({
+            next: (users) => {
+              this.users = users;
+            },
+          });
+      }
+    }
+  }
+
+  deleteTask() {
+    if (!this.taskToDelete) {
+      return;
+    }
+
     this.http
-      .post<Task>('http://localhost:3000/api/tasks', taskData)
+      .delete(`http://localhost:3000/api/tasks/${this.taskToDelete}`)
       .subscribe({
-        next: (newTask) => {
-          console.log('✅ Task created:', newTask);
+        next: () => {
+          console.log('✅ Task deleted');
 
           this.fetchTasks();
 
-          this.closeCreateModal();
-
-          this.newTask = {
-            title: '',
-            description: '',
-            assigneeId: '',
-            status: 'todo',
-            priority: 'medium',
-          };
+          this.closeDeleteModal();
         },
         error: (err) => {
-          console.error('❌ Error creating task:', err);
+          console.error('❌ Error deleting task:', err);
           alert(
-            'Failed to create task: ' + (err.error?.message || 'Unknown error')
+            'Failed to delete task: ' + (err.error?.message || 'Unknown error')
           );
         },
       });
