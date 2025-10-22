@@ -5,12 +5,14 @@ A role-based task management app built with NestJS, Angular, and TypeORM. Users 
 ## Quick Start
 
 ### Prerequisites
+
 - Node.js (v18+)
 - npm
 
 ### Running the App
 
 1. Install dependencies:
+
 ```bash
 npm install
 ```
@@ -20,6 +22,7 @@ npm install
 The app uses **Supabase** for the PostgreSQL database. You'll need to create a Supabase project and get your connection details.
 
 Create a `.env` file in the root (see `.env.example` for reference):
+
 ```bash
 DB_HOST=your-supabase-host.supabase.co
 DB_PORT=5432
@@ -33,11 +36,13 @@ NODE_ENV=development
 **Note**: If you want to use SQLite for local testing instead, you can skip the Supabase setup and the app will use an in-memory SQLite database.
 
 3. Start the backend API:
+
 ```bash
 npm run start:api
 ```
 
 4. In a new terminal, start the frontend:
+
 ```bash
 npm run start
 ```
@@ -47,6 +52,7 @@ npm run start
 ### Running Tests
 
 To run the backend test suite:
+
 ```bash
 npm test
 ```
@@ -54,6 +60,7 @@ npm test
 This runs 15 tests covering the RBAC guards, authentication, and API endpoints.
 
 You can also run specific test suites:
+
 ```bash
 npm run test:api   # Run API tests (8 tests)
 npm run test:auth  # Run auth library tests (7 tests)
@@ -125,6 +132,7 @@ libs/
 ```
 
 The `libs/data` folder has two entry points:
+
 - `@turbovets/data` - Full import for backend (includes TypeORM entities)
 - `@turbovets/data/frontend` - Safe import for frontend (just interfaces and enums, no database stuff)
 
@@ -133,19 +141,23 @@ This split was necessary because TypeORM decorators were executing in the browse
 ## Database Schema
 
 **Users**
+
 - Belongs to one Organization
 - Has one Role
 - Can be assigned many Tasks
 
 **Organizations**
+
 - Has many Users
 - Has many Tasks
 
 **Roles**
+
 - Has many Permissions
 - One of: Owner, Admin, Viewer
 
 **Tasks**
+
 - Belongs to one Organization
 - Assigned to one User (optional)
 - Has status (todo, in_progress, done) and priority (low, medium, high)
@@ -163,6 +175,7 @@ There are three guards working together:
 They run on every request in order. The RolesGuard uses the `@Roles()` decorator to know what level is needed.
 
 Example from the tasks controller:
+
 ```typescript
 @Get()
 @Roles(RoleType.VIEWER)
@@ -210,6 +223,7 @@ Every query filters by the user's organization ID. Here's how a viewer trying to
 ### Audit Logging
 
 The `AuditInterceptor` logs every request with:
+
 - Timestamp
 - HTTP method and URL
 - User ID
@@ -221,6 +235,7 @@ Currently logs go to the console, but the structure is there to send them to a d
 ## API Endpoints
 
 ### Auth
+
 ```
 POST /api/auth/register - Create new account
 POST /api/auth/login    - Get JWT token
@@ -228,6 +243,7 @@ GET  /api/auth/me       - Get current user info
 ```
 
 ### Tasks
+
 ```
 GET    /api/tasks                    - List all tasks in your org
 GET    /api/tasks/:id                - Get one task
@@ -237,6 +253,7 @@ DELETE /api/tasks/:id                - Delete task (Owner only)
 ```
 
 ### Users
+
 ```
 GET    /api/users                    - All users (Admin+)
 GET    /api/users/:id                - Get user details
@@ -251,6 +268,7 @@ All endpoints except `/auth/register` and `/auth/login` require a valid JWT.
 ### Example Request
 
 Creating a task:
+
 ```bash
 curl -X POST http://localhost:3000/api/tasks \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
@@ -270,66 +288,23 @@ curl -X POST http://localhost:3000/api/tasks \
 Added basic test suite covering critical security logic:
 
 **RolesGuard Tests** (`libs/auth/src/lib/guards/roles.guard.spec.ts`)
+
 - Role hierarchy enforcement (Owner > Admin > Viewer)
 - Permission checking logic
 - Edge cases (missing users, no roles required)
 
 **AuthService Tests** (`apps/api/src/app/auth/auth.service.spec.ts`)
+
 - Login with valid/invalid credentials
 - User registration
 - JWT token generation
 
 **TasksController Tests** (`apps/api/src/app/tasks/tasks.controller.spec.ts`)
+
 - Basic CRUD operations
 - Service method calls
 
 The tests use Jest with mocked dependencies. They focus on the RBAC logic since that's the core security feature.
-
-## What I'd Improve With More Time
-
-**Better Test Coverage** - Would add:
-- Integration tests for the full request flow with real database
-- Tests for OrgOwnershipGuard and other guards
-- Proper component tests for the Angular UI (currently none)
-- E2E tests for critical user flows
-- Test coverage reports
-
-**Audit Log Viewer** - The interceptor logs everything but there's no UI to view it. Would add a page for Owners/Admins to see the audit trail.
-
-**Task Filtering/Sorting** - The UI shows all tasks. Would add filters by status, priority, assignee and sorting options.
-
-**Drag and Drop** - Would make the UI feel more polished to drag tasks between status columns.
-
-**Performance Improvements**:
-- Pagination for task lists
-- Caching for role/permission lookups
-- Query optimization (select only needed fields)
-
-**Better Token Management**:
-- JWT refresh tokens
-- Shorter access token lifetime
-- Token revocation
-
-**More Robust Validation**:
-- Email format validation
-- Password strength requirements
-- Due date validation
-
-**Additional Features**:
-- Task categories or projects
-- Task comments
-- File attachments
-- Email notifications
-
-## Known Limitations
-
-- Tokens don't expire
-- No pagination on task lists
-- Audit logs only go to console
-- No password reset flow
-- Can't change your own password
-- Task due dates don't handle timezones
-- No email verification on signup
 
 ## Security Notes
 
