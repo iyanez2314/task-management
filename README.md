@@ -112,7 +112,7 @@ apps/
         roles/         # Role definitions
         permissions/   # Permission setup
         common/        # Guards & interceptors
-  turbovets-takehome/  # Angular frontend
+  dashboard/  # Angular frontend
     src/
       app/
         login/         # Login page
