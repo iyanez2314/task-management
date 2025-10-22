@@ -12,7 +12,7 @@ import { CommonModule } from '@angular/common';
 })
 export class App implements OnInit {
   private http = inject(HttpClient);
-  protected title = 'turbovets-takehome';
+  protected title = 'dashboard';
   protected apiMessage = '';
   protected loading = false;
   protected error = '';

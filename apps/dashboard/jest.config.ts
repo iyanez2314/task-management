@@ -1,8 +1,8 @@
 export default {
-  displayName: 'turbovets-takehome',
+  displayName: 'dashboard',
   preset: '../../jest.preset.js',
   setupFilesAfterEnv: ['<rootDir>/src/test-setup.ts'],
-  coverageDirectory: '../../coverage/apps/turbovets-takehome',
+  coverageDirectory: '../../coverage/apps/dashboard',
   transform: {
     '^.+\\.(ts|mjs|js|html)$': [
       'jest-preset-angular',

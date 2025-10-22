@@ -1,26 +1,26 @@
 {
-  "name": "turbovets-takehome",
+  "name": "dashboard",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
   "prefix": "app",
-  "sourceRoot": "apps/turbovets-takehome/src",
+  "sourceRoot": "apps/dashboard/src",
   "tags": [],
   "targets": {
     "build": {
       "executor": "@angular/build:application",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/apps/turbovets-takehome",
-        "browser": "apps/turbovets-takehome/src/main.ts",
+        "outputPath": "dist/apps/dashboard",
+        "browser": "apps/dashboard/src/main.ts",
         "polyfills": ["zone.js"],
-        "tsConfig": "apps/turbovets-takehome/tsconfig.app.json",
+        "tsConfig": "apps/dashboard/tsconfig.app.json",
         "assets": [
           {
             "glob": "**/*",
-            "input": "apps/turbovets-takehome/public"
+            "input": "apps/dashboard/public"
           }
         ],
-        "styles": ["apps/turbovets-takehome/src/styles.css"]
+        "styles": ["apps/dashboard/src/styles.css"]
       },
       "configurations": {
         "production": {
@@ -51,10 +51,10 @@
       "executor": "@angular/build:dev-server",
       "configurations": {
         "production": {
-          "buildTarget": "turbovets-takehome:build:production"
+          "buildTarget": "dashboard:build:production"
         },
         "development": {
-          "buildTarget": "turbovets-takehome:build:development"
+          "buildTarget": "dashboard:build:development"
         }
       },
       "defaultConfiguration": "development"
@@ -62,7 +62,7 @@
     "extract-i18n": {
       "executor": "@angular/build:extract-i18n",
       "options": {
-        "buildTarget": "turbovets-takehome:build"
+        "buildTarget": "dashboard:build"
       }
     },
     "lint": {
@@ -72,16 +72,16 @@
       "executor": "@nx/jest:jest",
       "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
       "options": {
-        "jestConfig": "apps/turbovets-takehome/jest.config.ts",
-        "tsConfig": "apps/turbovets-takehome/tsconfig.spec.json"
+        "jestConfig": "apps/dashboard/jest.config.ts",
+        "tsConfig": "apps/dashboard/tsconfig.spec.json"
       }
     },
     "serve-static": {
       "continuous": true,
       "executor": "@nx/web:file-server",
       "options": {
-        "buildTarget": "turbovets-takehome:build",
-        "staticFilePath": "dist/apps/turbovets-takehome/browser",
+        "buildTarget": "dashboard:build",
+        "staticFilePath": "dist/apps/dashboard/browser",
         "spa": true
       }
     }
