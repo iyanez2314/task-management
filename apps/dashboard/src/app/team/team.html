@@ -1,0 +1,361 @@
+<div class="max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-800 mb-1">Team Members</h1>
+      <p class="text-gray-600">Manage your organization's team</p>
+    </div>
+  </div>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-gray-600 text-sm font-medium mb-1">Total Members</p>
+          <p class="text-3xl font-bold text-gray-800">
+            {{ teamMembers.length }}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-blue-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-gray-600 text-sm font-medium mb-1">Active Members</p>
+          <p class="text-3xl font-bold text-gray-800">
+            {{ getActiveMembersCount() }}
+          </p>
+        </div>
+        <div
+          class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-green-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-gray-600 text-sm font-medium mb-1">Admins</p>
+          <p class="text-3xl font-bold text-gray-800">{{ getAdminCount() }}</p>
+        </div>
+        <div
+          class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center"
+        >
+          <svg
+            class="w-6 h-6 text-purple-600"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
+            />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="flex justify-center items-center py-20">
+    <div class="relative">
+      <div
+        class="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"
+      ></div>
+      <p class="text-gray-600 mt-4 text-center">Loading team members...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div
+    *ngIf="error && !loading"
+    class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm mb-6"
+  >
+    <div class="flex items-start">
+      <div class="flex-shrink-0">
+        <svg
+          class="h-6 w-6 text-red-500"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
+        </svg>
+      </div>
+      <div class="ml-3">
+        <h3 class="text-red-800 font-semibold">Error Loading Team Members</h3>
+        <p class="text-red-700 mt-1">{{ error }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Members Grid -->
+  <div
+    *ngIf="!loading && !error"
+    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+  >
+    <div
+      *ngFor="let member of filteredMembers"
+      class="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 p-6 border border-gray-200"
+    >
+      <!-- Header with Avatar and Status -->
+      <div class="flex items-start justify-between mb-4">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-14 h-14 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md"
+          >
+            {{ member.name.charAt(0).toUpperCase() }}
+          </div>
+          <div>
+            <h3 class="text-lg font-bold text-gray-800">{{ member.name }}</h3>
+            <p class="text-sm text-gray-500">{{ member.email }}</p>
+          </div>
+        </div>
+        <!-- <span -->
+        <!--   class="px-2.5 py-1 rounded-full text-xs font-semibold" -->
+        <!--   [ngClass]="{ -->
+        <!--     'bg-green-100 text-green-700': member.status === 'active', -->
+        <!--     'bg-gray-100 text-gray-700': member.status === 'inactive' -->
+        <!--   }" -->
+        <!-- > -->
+        <!--   {{ member.status }} -->
+        <!-- </span> -->
+      </div>
+
+      <!-- Role Badge -->
+      <div class="mb-4">
+        <!-- <span -->
+        <!--   class="px-3 py-1 rounded-lg text-xs font-semibold" -->
+        <!--   [ngClass]="{ -->
+        <!--     'bg-purple-100 text-purple-700': member.role === 'admin', -->
+        <!--     'bg-blue-100 text-blue-700': member.role === 'member' -->
+        <!--   }" -->
+        <!-- > -->
+        <!--   <svg -->
+        <!--     *ngIf="member.role === 'admin'" -->
+        <!--     class="w-3 h-3 inline mr-1" -->
+        <!--     fill="currentColor" -->
+        <!--     viewBox="0 0 20 20" -->
+        <!--   > -->
+        <!--     <path -->
+        <!--       d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" -->
+        <!--     /> -->
+        <!--   </svg> -->
+        <!--   {{ member.role | titlecase }} -->
+        <!-- </span> -->
+      </div>
+
+      <!-- Stats -->
+      <div class="flex gap-4 mb-4 pb-4 border-b border-gray-100">
+        <div>
+          <p class="text-xs text-gray-500">Tasks Assigned</p>
+          <!-- <p class="text-lg font-bold text-gray-800"> -->
+          <!--   {{ member.tasksAssigned || 0 }} -->
+          <!-- </p> -->
+        </div>
+        <div>
+          <p class="text-xs text-gray-500">Tasks Completed</p>
+          <!-- <p class="text-lg font-bold text-gray-800"> -->
+          <!--   {{ member.tasksCompleted || 0 }} -->
+          <!-- </p> -->
+        </div>
+      </div>
+
+      <!-- Join Date -->
+      <div class="text-xs text-gray-500 mb-4">
+        <!-- <span class="font-medium">Joined:</span> {{ member.joinedDate | date: -->
+        <!-- 'MMM d, yyyy' }} -->
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex gap-2">
+        <button
+          (click)="editMember(member.id)"
+          class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 px-3 py-2 rounded-lg font-medium transition duration-200 flex items-center justify-center gap-2 text-sm border border-blue-200"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+            />
+          </svg>
+          Edit
+        </button>
+        <button
+          (click)="removeMember(member.id)"
+          class="flex-1 bg-red-50 hover:bg-red-100 text-red-600 px-3 py-2 rounded-lg font-medium transition duration-200 flex items-center justify-center gap-2 text-sm border border-red-200"
+        >
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+          Remove
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Empty State -->
+  <div
+    *ngIf="!loading && !error && filteredMembers.length === 0"
+    class="text-center py-20"
+  >
+    <svg
+      class="w-24 h-24 mx-auto text-gray-300 mb-4"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+      />
+    </svg>
+    <h3 class="text-2xl font-semibold text-gray-700 mb-2">
+      No team members found
+    </h3>
+    <p class="text-gray-500">
+      Try adjusting your filters or invite new members
+    </p>
+  </div>
+
+  <!-- Invite Modal -->
+  <div
+    *ngIf="showInviteModal"
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    (click)="closeInviteModal()"
+  >
+    <div
+      class="bg-white rounded-xl shadow-2xl p-8 max-w-md w-full mx-4"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-2xl font-bold text-gray-800">Invite Team Member</h2>
+        <button
+          (click)="closeInviteModal()"
+          class="text-gray-400 hover:text-gray-600 transition"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+      </div>
+
+      <form (ngSubmit)="sendInvite()">
+        <!-- Email -->
+        <div class="mb-4">
+          <label class="block text-gray-700 text-sm font-bold mb-2"
+            >Email Address *</label
+          >
+          <input
+            [(ngModel)]="inviteEmail"
+            name="email"
+            type="email"
+            required
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="colleague@example.com"
+          />
+        </div>
+
+        <!-- Role -->
+        <div class="mb-6">
+          <label class="block text-gray-700 text-sm font-bold mb-2">Role</label>
+          <select
+            [(ngModel)]="inviteRole"
+            name="role"
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="member">Member</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex gap-3">
+          <button
+            type="submit"
+            class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200"
+          >
+            Send Invite
+          </button>
+          <button
+            type="button"
+            (click)="closeInviteModal()"
+            class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-200"
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
