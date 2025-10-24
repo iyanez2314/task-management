@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import type { IUser } from '@turbovets/data/frontend';
+import { RoleType } from '@turbovets/data/frontend';
 import { environment } from '../../environments/environment';
 
 export type User = IUser;
@@ -22,10 +23,10 @@ export class AuthService {
     password: string
   ): Observable<{ access_token: string; user: User }> {
     return this.http
-      .post<{ access_token: string; user: User }>(
-        `${this.apiUrl}/auth/login`,
-        { email, password }
-      )
+      .post<{ access_token: string; user: User }>(`${this.apiUrl}/auth/login`, {
+        email,
+        password,
+      })
       .pipe(
         tap((response) => {
           localStorage.setItem('access_token', response.access_token);
@@ -53,5 +54,15 @@ export class AuthService {
   getOrganizationId(): string | null {
     const user = this.currentUserSubject.value;
     return user ? user.organizationId : null;
+  }
+
+  getUserRoleName(): RoleType | string {
+    const user = this.currentUserSubject.value;
+    return user ? user.role.name : '';
+  }
+
+  currentUserId(): string | null {
+    const user = this.currentUserSubject.value;
+    return user ? user.id : null;
   }
 }

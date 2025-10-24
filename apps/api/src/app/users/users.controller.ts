@@ -65,7 +65,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @Roles(RoleType.OWNER)
+  @Roles(RoleType.ADMIN)
   remove(@Param('id') id: string): Promise<void> {
     return this.usersService.remove(id);
   }
