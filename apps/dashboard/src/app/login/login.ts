@@ -5,6 +5,7 @@ import { FormBuilder, ReactiveFormsModule, FormGroup } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 
 @Component({
+  standalone: true,
   imports: [RouterModule, CommonModule, ReactiveFormsModule],
   selector: 'login-root',
   templateUrl: './login.html',

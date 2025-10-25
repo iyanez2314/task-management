@@ -7,6 +7,7 @@ import { IUser } from '@turbovets/data/frontend';
 import { RoleType } from '@turbovets/data/frontend';
 
 @Component({
+  standalone: true,
   imports: [CommonModule, FormsModule],
   selector: 'team-root',
   templateUrl: './team.html',

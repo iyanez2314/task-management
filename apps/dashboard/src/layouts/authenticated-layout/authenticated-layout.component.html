@@ -218,4 +218,109 @@
       </div>
     </main>
   </div>
+
+  <!-- Floating Action Button Group -->
+  <div
+    (mouseenter)="showFabActions = true"
+    (mouseleave)="showFabActions = false"
+    class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3"
+  >
+    <!-- Add User Quick Action -->
+    <div
+      class="flex items-center gap-3 transition-all duration-300 ease-out"
+      [ngClass]="{
+        'opacity-100 translate-y-0': showFabActions,
+        'opacity-0 translate-y-4 pointer-events-none': !showFabActions
+      }"
+    >
+      <span
+        class="bg-gray-800 text-white text-sm px-3 py-1.5 rounded-lg shadow-md whitespace-nowrap"
+      >
+        Add User
+      </span>
+      <button
+        (click)="openAddUser()"
+        class="w-12 h-12 bg-green-600 hover:bg-green-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
+      >
+        <svg
+          class="w-5 h-5 group-hover:scale-110 transition-transform duration-200"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Add Task Quick Action -->
+    <div
+      class="flex items-center gap-3 transition-all duration-300 ease-out"
+      [ngClass]="{
+        'opacity-100 translate-y-0': showFabActions,
+        'opacity-0 translate-y-4 pointer-events-none': !showFabActions
+      }"
+      style="transition-delay: 50ms"
+    >
+      <span
+        class="bg-gray-800 text-white text-sm px-3 py-1.5 rounded-lg shadow-md whitespace-nowrap"
+      >
+        Add Task
+      </span>
+      <button
+        (click)="openAddTask()"
+        class="w-12 h-12 bg-purple-600 hover:bg-purple-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
+      >
+        <svg
+          class="w-5 h-5 group-hover:scale-110 transition-transform duration-200"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Main FAB -->
+    <button
+      class="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center group"
+      [ngClass]="{ 'rotate-45': showFabActions }"
+    >
+      <svg
+        class="w-6 h-6 group-hover:scale-110 transition-transform duration-200"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M12 4v16m8-8H4"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <!-- Modal Components -->
+  <app-add-user-modal
+    [(isOpen)]="showAddUserModal"
+    (userAdded)="onUserAdded()"
+  ></app-add-user-modal>
+
+  <app-add-task-modal
+    [(isOpen)]="showAddTaskModal"
+    (taskAdded)="onTaskAdded()"
+  ></app-add-task-modal>
 </div>

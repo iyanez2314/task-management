@@ -1,22 +1,18 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterModule, Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { TaskManagementService } from '../services/task-management.service';
 import type { ITask, IUser } from '@turbovets/data/frontend';
 import { RoleType } from '@turbovets/data/frontend';
-import { environment } from '../../environments/environment';
 
 @Component({
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule],
-  selector: 'dashboard-root',
-  templateUrl: './dashboard.html',
+  imports: [CommonModule, FormsModule],
+  selector: 'tasks-root',
+  templateUrl: './tasks.html',
 })
-export class DashboardComponent implements OnInit {
-  private apiUrl = environment.apiUrl;
+export class TasksComponent implements OnInit {
   tasks: ITask[] = [];
   users: IUser[] = [];
   loading: boolean = true;
@@ -37,18 +33,7 @@ export class DashboardComponent implements OnInit {
   isEditMode: boolean = false;
   taskBeingEdited: string | null = null;
 
-  showAddUserModal: boolean = false;
-  roles: any[] = [];
-  newUser = {
-    name: '',
-    email: '',
-    password: '',
-    roleId: '',
-  };
-
   constructor(
-    private http: HttpClient,
-    private router: Router,
     private authService: AuthService,
     private taskManagementService: TaskManagementService
   ) {}
@@ -56,7 +41,7 @@ export class DashboardComponent implements OnInit {
   ngOnInit() {
     this.loading = true;
 
-    if (!this.authService.currentUser$) {
+    if (!this.authService.currentUserSubject.value) {
       this.authService.loadCurrentUser().subscribe({
         next: () => {
           this.fetchTasks();
@@ -86,16 +71,11 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  logout() {
-    this.authService.logout();
-  }
-
   openCreateTaskModal() {
     this.isEditMode = false;
     this.taskBeingEdited = null;
     this.showCreateModal = true;
 
-    // Reset form
     this.newTask = {
       title: '',
       description: '',
@@ -168,11 +148,9 @@ export class DashboardComponent implements OnInit {
           });
 
     request.subscribe({
-      next: (newTask) => {
+      next: () => {
         this.fetchTasks();
-
         this.closeCreateModal();
-
         this.newTask = {
           title: '',
           description: '',
@@ -183,7 +161,7 @@ export class DashboardComponent implements OnInit {
       },
       error: (err) => {
         alert(
-          'Failed to create task: ' + (err.error?.message || 'Unknown error')
+          'Failed to save task: ' + (err.error?.message || 'Unknown error')
         );
       },
     });
@@ -279,83 +257,5 @@ export class DashboardComponent implements OnInit {
       currentUser.role.name === RoleType.OWNER ||
       currentUser.role.name === RoleType.ADMIN
     );
-  }
-
-  canManageUsers(): boolean {
-    const currentUser = this.authService.currentUserSubject.value;
-
-    if (!currentUser || !currentUser.role) {
-      return false;
-    }
-
-    return (
-      currentUser.role.name === RoleType.OWNER ||
-      currentUser.role.name === RoleType.ADMIN
-    );
-  }
-
-  openAddUserModal() {
-    this.showAddUserModal = true;
-
-    // Reset form
-    this.newUser = {
-      name: '',
-      email: '',
-      password: '',
-      roleId: '',
-    };
-
-    // Load available roles
-    this.http.get<any[]>(`${this.apiUrl}/roles`).subscribe({
-      next: (roles) => {
-        this.roles = roles;
-      },
-      error: (err) => {
-        console.error('Error loading roles:', err);
-      },
-    });
-  }
-
-  closeAddUserModal() {
-    this.showAddUserModal = false;
-  }
-
-  saveUser() {
-    if (
-      !this.newUser.name.trim() ||
-      !this.newUser.email.trim() ||
-      !this.newUser.password.trim() ||
-      !this.newUser.roleId
-    ) {
-      alert('Please fill in all user details');
-      return;
-    }
-    const organizationId = this.authService.getOrganizationId();
-    if (!organizationId) {
-      alert('Organization ID not found. Please log in again.');
-      return;
-    }
-
-    const userData = {
-      name: this.newUser.name,
-      email: this.newUser.email,
-      password: this.newUser.password,
-      roleId: this.newUser.roleId,
-      organizationId: organizationId,
-    };
-
-    this.http
-      .post<IUser>(`${this.apiUrl}/users`, userData)
-      .subscribe({
-        next: (newUser) => {
-          alert('User created successfully');
-          this.closeAddUserModal();
-        },
-        error: (err) => {
-          alert(
-            'Failed to create user: ' + (err.error?.message || 'Unknown error')
-          );
-        },
-      });
   }
 }

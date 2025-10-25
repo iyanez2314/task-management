@@ -4,6 +4,7 @@ import { DashboardComponent } from './dashboard/dashboard';
 import { authGuard } from './auth.guard';
 import { AuthenticatedLayoutComponent } from '../layouts/authenticated-layout/authenticated-layout-component';
 import { TeamComponent } from './team/team';
+import { TasksComponent } from './tasks/tasks';
 
 export const appRoutes: Route[] = [
   {
@@ -34,6 +35,17 @@ export const appRoutes: Route[] = [
       {
         path: '',
         component: TeamComponent,
+      },
+    ],
+  },
+  {
+    path: 'tasks',
+    component: AuthenticatedLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        component: TasksComponent,
       },
     ],
   },
