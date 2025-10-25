@@ -39,4 +39,9 @@ export class LoginComponent {
       }
     });
   }
+
+  loginAsDemo(email: string, password: string) {
+    this.loginForm.patchValue({ email, password });
+    this.login();
+  }
 }
