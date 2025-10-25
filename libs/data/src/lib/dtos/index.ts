@@ -25,3 +25,8 @@ export {
   CreatePermissionDto,
   UpdatePermissionDto
 } from './role.dto';
+
+// Audit Log DTOs
+export {
+  AuditLogResponseDto
+} from './audit-log.dto';

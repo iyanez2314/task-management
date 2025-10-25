@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../app/services/auth.service';
 import { AddUserModalComponent } from '../../app/components/modals/add-user-modal.component';
 import { AddTaskModalComponent } from '../../app/components/modals/add-task-modal.component';
+import { RoleType } from '@turbovets/data/frontend';
 
 @Component({
   standalone: true,
@@ -70,5 +71,18 @@ export class AuthenticatedLayoutComponent implements OnInit {
 
   onUserAdded() {
     window.location.reload();
+  }
+
+  canViewLogs(): boolean {
+    const currentUser = this.authService.currentUserSubject.value;
+
+    if (!currentUser || !currentUser.role) {
+      return false;
+    }
+
+    return (
+      currentUser.role.name === RoleType.OWNER ||
+      currentUser.role.name === RoleType.ADMIN
+    );
   }
 }

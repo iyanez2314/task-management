@@ -9,7 +9,8 @@ import { RolesModule } from './roles/role.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
-import { User, Organization, Task, Role, Permission } from '@turbovets/data';
+import { AuditLogsModule } from './audit-logs/audit-logs.module';
+import { User, Organization, Task, Role, Permission, AuditLog } from '@turbovets/data';
 
 @Module({
   imports: [
@@ -20,7 +21,7 @@ import { User, Organization, Task, Role, Permission } from '@turbovets/data';
       username: process.env.DB_USERNAME || 'postgres',
       password: process.env.DB_PASSWORD || 'postgres',
       database: process.env.DB_DATABASE || 'turbovets',
-      entities: [User, Organization, Task, Role, Permission],
+      entities: [User, Organization, Task, Role, Permission, AuditLog],
       synchronize: process.env.NODE_ENV !== 'production',
       logging: process.env.NODE_ENV !== 'production',
       ssl: process.env.DB_HOST?.includes('supabase.co')
@@ -34,6 +35,7 @@ import { User, Organization, Task, Role, Permission } from '@turbovets/data';
     TasksModule,
     RolesModule,
     PermissionsModule,
+    AuditLogsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

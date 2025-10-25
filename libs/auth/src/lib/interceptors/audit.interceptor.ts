@@ -3,50 +3,70 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
+  Inject,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 @Injectable()
 export class AuditInterceptor implements NestInterceptor {
+  constructor(
+    @Inject('AUDIT_LOGS_SERVICE') private readonly auditLogsService: any
+  ) {}
+
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest();
-    const { method, url, body, user } = request;
-    const timestamp = new Date().toISOString();
+    const { method, url, body, user, ip, headers } = request;
+    const startTime = Date.now();
 
-    const logEntry = {
-      timestamp,
+    const logData = {
+      timestamp: new Date(),
       method,
       url,
-      userId: user?.id || 'anonymous',
-      userEmail: user?.email || 'N/A',
-      organizationId: user?.organizationId || 'N/A',
-      role: user?.role?.name || 'N/A',
-      body: this.sanitizeBody(body),
+      userId: user?.id || null,
+      userEmail: user?.email || null,
+      organizationId: user?.organizationId || null,
+      role: user?.role?.name || null,
+      requestBody: this.sanitizeBody(body),
+      status: 'pending',
+      ipAddress: ip || request.connection?.remoteAddress || null,
+      userAgent: headers['user-agent'] || null,
     };
 
-    console.log('🔍 AUDIT LOG:', JSON.stringify(logEntry, null, 2));
+    console.log('🔍 AUDIT LOG:', JSON.stringify(logData, null, 2));
 
     return next.handle().pipe(
       tap({
-        next: (response) => {
-          console.log('✅ AUDIT LOG - SUCCESS:', {
-            timestamp: new Date().toISOString(),
-            method,
-            url,
-            userId: user?.id || 'anonymous',
-            status: 'success',
-          });
+        next: async (response) => {
+          const responseTime = Date.now() - startTime;
+
+          try {
+            await this.auditLogsService.create({
+              ...logData,
+              status: 'success',
+              statusCode: 200,
+              responseTime,
+            });
+            console.log('✅ AUDIT LOG SAVED - SUCCESS');
+          } catch (error) {
+            console.error('❌ Failed to save audit log:', error);
+          }
         },
-        error: (error) => {
-          console.log('❌ AUDIT LOG - ERROR:', {
-            timestamp: new Date().toISOString(),
-            method,
-            url,
-            userId: user?.id || 'anonymous',
-            status: 'error',
-            error: error.message,
-          });
+        error: async (error) => {
+          const responseTime = Date.now() - startTime;
+
+          try {
+            await this.auditLogsService.create({
+              ...logData,
+              status: 'error',
+              statusCode: error.status || 500,
+              errorMessage: error.message,
+              responseTime,
+            });
+            console.log('✅ AUDIT LOG SAVED - ERROR');
+          } catch (err) {
+            console.error('❌ Failed to save audit log:', err);
+          }
         },
       })
     );

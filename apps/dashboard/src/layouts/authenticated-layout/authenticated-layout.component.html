@@ -78,7 +78,7 @@
   <div class="flex">
     <!-- Sidebar -->
     <aside
-      class="fixed lg:static inset-y-0 left-0 w-64 bg-white border-r border-gray-200 shadow-lg lg:shadow-none transform transition-transform duration-300 ease-in-out z-40 pt-20 lg:pt-0"
+      class="fixed lg:static inset-y-0 left-0 w-64 bg-white border-r border-gray-200 shadow-lg lg:shadow-none transform transition-transform duration-300 ease-in-out z-40 pt-20 lg:pt-0 lg:min-h-screen"
       [ngClass]="
         sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
       "
@@ -150,9 +150,10 @@
           <span class="font-medium">Team</span>
         </a>
 
-        <!-- Reports -->
+        <!-- Org Logs (Only for Owners and Admins) -->
         <a
-          routerLink="/reports"
+          *ngIf="canViewLogs()"
+          routerLink="/organization-logs"
           routerLinkActive="bg-blue-50 text-blue-600 border-blue-600"
           class="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50 transition duration-200 border-l-4 border-transparent"
         >
@@ -169,7 +170,7 @@
               d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
             />
           </svg>
-          <span class="font-medium">Reports</span>
+          <span class="font-medium">Logs</span>
         </a>
 
         <div class="border-t border-gray-200 my-4"></div>

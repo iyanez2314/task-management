@@ -4,7 +4,7 @@ import * as bcrypt from 'bcryptjs';
 import { DataSource } from 'typeorm';
 
 dotenv.config();
-import { Role, RoleType, Permission, Organization, User, Task, TaskStatus, TaskPriority } from '@turbovets/data';
+import { Role, RoleType, Permission, Organization, User, Task, TaskStatus, TaskPriority, AuditLog } from '@turbovets/data';
 
 async function seed() {
   const dataSource = new DataSource({
@@ -14,7 +14,7 @@ async function seed() {
     username: process.env.DB_USERNAME || 'postgres',
     password: process.env.DB_PASSWORD || 'postgres',
     database: process.env.DB_DATABASE || 'turbovets',
-    entities: [Role, Permission, Organization, User, Task],
+    entities: [Role, Permission, Organization, User, Task, AuditLog],
     synchronize: true,
     ssl: process.env.DB_HOST?.includes('supabase.co')
       ? { rejectUnauthorized: false }
@@ -23,6 +23,13 @@ async function seed() {
 
   await dataSource.initialize();
   console.log('🌱 Starting database seed...\n');
+
+  // ====================================
+  // 0. Clear existing data
+  // ====================================
+  console.log('🗑️  Clearing existing data...');
+  await dataSource.query('TRUNCATE TABLE "audit_logs", "tasks", "users", "organizations", "roles", "permissions" RESTART IDENTITY CASCADE');
+  console.log('  ✓ All tables cleared\n');
 
   // ====================================
   // 1. Create Permissions
@@ -184,6 +191,117 @@ async function seed() {
   console.log(`  ✓ Created task: ${task4.title}`);
 
   // ====================================
+  // 6. Create Audit Logs
+  // ====================================
+  console.log('\n📋 Creating audit logs...');
+
+  const baseTime = new Date();
+  baseTime.setHours(baseTime.getHours() - 2);
+
+  const auditLog1 = await dataSource.getRepository(AuditLog).save({
+    timestamp: new Date(baseTime.getTime() + 1000 * 60 * 5),
+    method: 'POST',
+    url: '/auth/login',
+    userId: ownerUser.id,
+    userEmail: ownerUser.email,
+    organizationId: org1.id,
+    role: 'OWNER',
+    requestBody: { email: 'owner@acme.com' },
+    status: 'success',
+    statusCode: 200,
+    responseTime: 145,
+    ipAddress: '192.168.1.100',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+  });
+  console.log(`  ✓ Created audit log: ${auditLog1.method} ${auditLog1.url}`);
+
+  const auditLog2 = await dataSource.getRepository(AuditLog).save({
+    timestamp: new Date(baseTime.getTime() + 1000 * 60 * 15),
+    method: 'POST',
+    url: '/users',
+    userId: ownerUser.id,
+    userEmail: ownerUser.email,
+    organizationId: org1.id,
+    role: 'OWNER',
+    requestBody: { email: 'admin@acme.com', name: 'Bob Admin' },
+    status: 'success',
+    statusCode: 201,
+    responseTime: 234,
+    ipAddress: '192.168.1.100',
+    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
+  });
+  console.log(`  ✓ Created audit log: ${auditLog2.method} ${auditLog2.url}`);
+
+  const auditLog3 = await dataSource.getRepository(AuditLog).save({
+    timestamp: new Date(baseTime.getTime() + 1000 * 60 * 30),
+    method: 'GET',
+    url: '/tasks',
+    userId: adminUser.id,
+    userEmail: adminUser.email,
+    organizationId: org1.id,
+    role: 'ADMIN',
+    requestBody: {},
+    status: 'success',
+    statusCode: 200,
+    responseTime: 89,
+    ipAddress: '192.168.1.101',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+  });
+  console.log(`  ✓ Created audit log: ${auditLog3.method} ${auditLog3.url}`);
+
+  const auditLog4 = await dataSource.getRepository(AuditLog).save({
+    timestamp: new Date(baseTime.getTime() + 1000 * 60 * 45),
+    method: 'PUT',
+    url: `/tasks/${task2.id}`,
+    userId: adminUser.id,
+    userEmail: adminUser.email,
+    organizationId: org1.id,
+    role: 'ADMIN',
+    requestBody: { status: 'IN_PROGRESS' },
+    status: 'success',
+    statusCode: 200,
+    responseTime: 156,
+    ipAddress: '192.168.1.101',
+    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
+  });
+  console.log(`  ✓ Created audit log: ${auditLog4.method} ${auditLog4.url}`);
+
+  const auditLog5 = await dataSource.getRepository(AuditLog).save({
+    timestamp: new Date(baseTime.getTime() + 1000 * 60 * 60),
+    method: 'DELETE',
+    url: '/users/fake-user-id',
+    userId: viewerUser.id,
+    userEmail: viewerUser.email,
+    organizationId: org1.id,
+    role: 'VIEWER',
+    requestBody: {},
+    status: 'error',
+    statusCode: 403,
+    errorMessage: 'Forbidden: Insufficient permissions',
+    responseTime: 12,
+    ipAddress: '192.168.1.102',
+    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X)',
+  });
+  console.log(`  ✓ Created audit log: ${auditLog5.method} ${auditLog5.url} (error)`);
+
+  const auditLog6 = await dataSource.getRepository(AuditLog).save({
+    timestamp: new Date(baseTime.getTime() + 1000 * 60 * 75),
+    method: 'POST',
+    url: '/tasks',
+    userId: org2User.id,
+    userEmail: org2User.email,
+    organizationId: org2.id,
+    role: 'ADMIN',
+    requestBody: { title: 'Deploy to production', priority: 'LOW' },
+    status: 'success',
+    statusCode: 201,
+    responseTime: 198,
+    ipAddress: '10.0.0.50',
+    userAgent: 'Mozilla/5.0 (X11; Linux x86_64)',
+  });
+  console.log(`  ✓ Created audit log: ${auditLog6.method} ${auditLog6.url}`);
+
+  // ====================================
   // Summary
   // ====================================
   console.log('\n✅ Seed completed successfully!\n');
@@ -193,6 +311,7 @@ async function seed() {
   console.log(`  - 2 organizations`);
   console.log(`  - 4 users`);
   console.log(`  - 4 tasks`);
+  console.log(`  - 6 audit logs`);
   console.log('\n🔑 Test Users (all passwords: password123):');
   console.log(`  Owner:  ${ownerUser.email}`);
   console.log(`  Admin:  ${adminUser.email}`);

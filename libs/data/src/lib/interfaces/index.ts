@@ -25,3 +25,5 @@ export type {
   ICreateRoleRequest,
   IUpdateRoleRequest,
 } from './role.interface';
+
+export type { IAuditLog } from './audit-logs.interface';

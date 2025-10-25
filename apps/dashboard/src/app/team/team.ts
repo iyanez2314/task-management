@@ -92,9 +92,14 @@ export class TeamComponent implements OnInit {
   }
 
   canCurerntUserManageUser(user: IUser): boolean {
+    if (this.userRole === RoleType.VIEWER) {
+      return false;
+    }
+
     if (this.userRole === RoleType.ADMIN && user.role.name === RoleType.OWNER) {
       return false;
     }
+
     return true;
   }
 

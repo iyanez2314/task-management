@@ -1,53 +1,28 @@
 
-<div
-  class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 p-8"
->
-  <div class="max-w-6xl mx-auto">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-4xl font-bold text-gray-800 mb-1">Tasks Dashboard</h1>
-        <p class="text-gray-600">Manage and track your team's progress</p>
-      </div>
-      <div class="flex gap-3">
-        <button
-          *ngIf="canCreateTask()"
-          (click)="openCreateTaskModal()"
-          class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition duration-200 flex items-center gap-2"
-        >
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          Add Task
-        </button>
-        <button
-          *ngIf="canManageUsers()"
-          (click)="openAddUserModal()"
-          class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition duration-200 flex items-center gap-2"
-        >
-          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-          </svg>
-          Add User
-        </button>
-      </div>
+<div class="max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-8">
+    <div>
+      <h1 class="text-4xl font-bold text-gray-800 mb-1">Dashboard</h1>
+      <p class="text-gray-600">Welcome back! Here's your quick overview</p>
     </div>
+  </div>
 
-    <!-- Loading Spinner -->
-    <div *ngIf="loading" class="flex justify-center items-center py-20">
-      <div class="relative">
-        <div
-          class="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"
-        ></div>
-        <p class="text-gray-600 mt-4 text-center">Loading tasks...</p>
-      </div>
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="flex justify-center items-center py-20">
+    <div class="relative">
+      <div
+        class="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"
+      ></div>
+      <p class="text-gray-600 mt-4 text-center">Loading dashboard...</p>
     </div>
+  </div>
 
-    <!-- Error Message -->
-    <div
-      *ngIf="error && !loading"
-      class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm mb-6"
-    >
+  <!-- Error Message -->
+  <div
+    *ngIf="error && !loading"
+    class="bg-red-50 border-l-4 border-red-500 p-6 rounded-lg shadow-sm mb-6"
+  >
       <div class="flex items-start">
         <div class="flex-shrink-0">
           <svg
@@ -71,9 +46,22 @@
       </div>
     </div>
 
-    <!-- Tasks Grid -->
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading && !error">
+    <!-- Recent Tasks Component -->
+    <div class="mb-12">
+      <app-recent-tasks [tasks]="recentTasks"></app-recent-tasks>
+    </div>
+
+    <!-- Recent Logs Component -->
+    <div *ngIf="canViewLogs()">
+    <app-recent-logs [logs]="recentLogs"></app-recent-logs>
+    </div>
+  </div>
+
+  <!-- Old modals kept for compatibility -->
+  <div style="display: none;">
     <div
-      *ngIf="!loading && !error"
       class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
     >
       <div

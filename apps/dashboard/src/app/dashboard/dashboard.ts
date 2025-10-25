@@ -5,19 +5,31 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
 import { TaskManagementService } from '../services/task-management.service';
-import type { ITask, IUser } from '@turbovets/data/frontend';
+import { OrgLogsService } from '../services/org-logs.service';
+import type { ITask, IUser, IAuditLog } from '@turbovets/data/frontend';
 import { RoleType } from '@turbovets/data/frontend';
 import { environment } from '../../environments/environment';
+import { RecentTasksComponent } from '../components/recent-tasks/recent-tasks.component';
+import { RecentLogsComponent } from '../components/recent-logs/recent-logs.component';
 
 @Component({
   standalone: true,
-  imports: [RouterModule, CommonModule, FormsModule],
+  imports: [
+    RouterModule,
+    CommonModule,
+    FormsModule,
+    RecentTasksComponent,
+    RecentLogsComponent,
+  ],
   selector: 'dashboard-root',
   templateUrl: './dashboard.html',
 })
 export class DashboardComponent implements OnInit {
   private apiUrl = environment.apiUrl;
   tasks: ITask[] = [];
+  recentTasks: ITask[] = [];
+  recentLogs: IAuditLog[] = [];
+  currentUserRole: RoleType | string = '';
   users: IUser[] = [];
   loading: boolean = true;
   error: string | null = null;
@@ -50,7 +62,8 @@ export class DashboardComponent implements OnInit {
     private http: HttpClient,
     private router: Router,
     private authService: AuthService,
-    private taskManagementService: TaskManagementService
+    private taskManagementService: TaskManagementService,
+    private orgLogsService: OrgLogsService
   ) {}
 
   ngOnInit() {
@@ -60,6 +73,7 @@ export class DashboardComponent implements OnInit {
       this.authService.loadCurrentUser().subscribe({
         next: () => {
           this.fetchTasks();
+          this.currentUserRole = this.authService.getUserRoleName();
         },
         error: (err) => {
           console.error('Error loading user:', err);
@@ -76,11 +90,46 @@ export class DashboardComponent implements OnInit {
     this.taskManagementService.getAllTasks().subscribe({
       next: (data: ITask[]) => {
         this.tasks = data;
-        this.loading = false;
+        // Get the 3 most recent tasks
+        this.recentTasks = data.slice(0, 3);
+        this.fetchRecentLogs();
       },
       error: (err) => {
         console.error('Error fetching tasks:', err);
         this.error = 'Failed to load tasks. Please try again later.';
+        this.loading = false;
+      },
+    });
+  }
+
+  canViewLogs(): boolean {
+    const currentUser = this.authService.currentUserSubject.value;
+
+    if (!currentUser || !currentUser.role) {
+      return false;
+    }
+
+    return (
+      currentUser.role.name === RoleType.OWNER ||
+      currentUser.role.name === RoleType.ADMIN
+    );
+  }
+
+  fetchRecentLogs() {
+    const organizationId = this.authService.getOrganizationId();
+    if (!organizationId) {
+      this.loading = false;
+      return;
+    }
+
+    this.orgLogsService.getLogsByOrganization(organizationId).subscribe({
+      next: (logs: IAuditLog[]) => {
+        // Get the 5 most recent logs
+        this.recentLogs = logs.slice(0, 5);
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error fetching logs:', err);
         this.loading = false;
       },
     });
@@ -344,18 +393,16 @@ export class DashboardComponent implements OnInit {
       organizationId: organizationId,
     };
 
-    this.http
-      .post<IUser>(`${this.apiUrl}/users`, userData)
-      .subscribe({
-        next: (newUser) => {
-          alert('User created successfully');
-          this.closeAddUserModal();
-        },
-        error: (err) => {
-          alert(
-            'Failed to create user: ' + (err.error?.message || 'Unknown error')
-          );
-        },
-      });
+    this.http.post<IUser>(`${this.apiUrl}/users`, userData).subscribe({
+      next: (newUser) => {
+        alert('User created successfully');
+        this.closeAddUserModal();
+      },
+      error: (err) => {
+        alert(
+          'Failed to create user: ' + (err.error?.message || 'Unknown error')
+        );
+      },
+    });
   }
 }
